@@ -2,9 +2,10 @@
 //  NetworkService.swift
 //  Assignment1
 //
-//  Created by Микаэл Мартиросян on 04.08.2023.
+//  Created by Микаэл Мартиросян on 11.08.2023.
 //
 
+import Combine
 import Foundation
 
 final class NetworkService {
@@ -19,7 +20,7 @@ final class NetworkService {
     
     // MARK: - Functions
     
-    /// Fetches data with spicified values.
+    /// Fetches a data with spicified values.
     ///
     /// If the data isn't valid, this method throws the following errors:
     ///  - `NetworkErrors.invalidStatusCode`
@@ -29,25 +30,27 @@ final class NetworkService {
     ///   - page: Page number.
     ///   - usersLimit: Count of users per page.
     /// - Returns: An array of users.
-    func fetchData(page: Int, usersLimit: Int) async throws -> [User] {
-        let url: URL = try urlMaker(page, usersLimit)
-        
-        let (data, urlResponse) = try await URLSession.shared.data(from: url)
-        
-        guard let httpURLRespone = urlResponse as? HTTPURLResponse,
-              httpURLRespone.statusCode >= 200,
-              httpURLRespone.statusCode < 300
-        else {
-            throw NetworkErrors.invalidStatusCode
-        }
-        
+    func fetchData(page: Int, usersLimit: Int) -> AnyPublisher<[User], Error> {
         do {
-            let decodedResponse: Response = try JSONDecoder().decode(Response.self, from: data)
-            let results: [User] = decodedResponse.results
-            return results
-        }
-        catch {
-            throw NetworkErrors.decodingError
+            let url: URL = try urlMaker(page, usersLimit)
+            
+            return URLSession.shared.dataTaskPublisher(for: url)
+                .tryMap { data, response in
+                    guard let httpURLRespone = response as? HTTPURLResponse,
+                          httpURLRespone.statusCode >= 200,
+                          httpURLRespone.statusCode < 300
+                    else {
+                        throw NetworkErrors.invalidStatusCode
+                    }
+                    return data
+                }
+                .decode(type: Response.self, decoder: JSONDecoder())
+                .map(\.results)
+                .eraseToAnyPublisher()
+            
+        } catch {
+            return Fail(error: error)
+                .eraseToAnyPublisher()
         }
     }
     

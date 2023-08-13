@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct FailureView: View {
+    let errorMessage: String
+    
     // MARK: - Body
     var body: some View {
         ZStack {
@@ -21,7 +23,7 @@ struct FailureView: View {
                     .resizable()
                     .frame(width: 300, height: 300)
                 
-                Text("Something went wrong")
+                Text("Something has gone wrong")
                     .font(.title)
                     .foregroundColor(
                         .gray
@@ -29,7 +31,7 @@ struct FailureView: View {
                     )
                     .bold()
                 
-                Text("Place for error message")
+                Text(errorMessage)
                     .font(.title3)
                     .foregroundColor(
                         .gray
@@ -49,6 +51,6 @@ struct FailureView: View {
 // MARK: - FailureView_Previews
 struct FailureView_Previews: PreviewProvider {
     static var previews: some View {
-        FailureView()
+        FailureView(errorMessage: "Server error")
     }
 }

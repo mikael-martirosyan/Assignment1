@@ -10,7 +10,7 @@ import SwiftUI
 struct AnotherView: View {
     // MARK: - Body
     var body: some View {
-        FailureView()
+        FailureView(errorMessage: "")
     }
 }
 

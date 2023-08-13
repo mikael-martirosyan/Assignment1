@@ -34,6 +34,7 @@ struct Response: Decodable {
             
             var street: Street
             var city: String
+            var state: String
             var country: String
         }
         
@@ -52,7 +53,15 @@ struct Response: Decodable {
         
         private var location: Location
         var fullLocation: String {
-            "\(location.street.number) \(location.street.name), \(location.city), \(location.country)"
+            "\(location.street.number) \(location.street.name), \(location.city), \(location.state), \(location.country)"
+        }
+        
+        var address: Address {
+            Address(streetNumber: location.street.number,
+                    streetName: location.street.name,
+                    city: location.city,
+                    state: location.state,
+                    country: location.country)
         }
         
         var picture: Picture
